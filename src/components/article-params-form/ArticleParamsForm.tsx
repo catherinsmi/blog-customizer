@@ -4,18 +4,27 @@ import { Text } from '../text';
 import { Select } from '../select';
 import { Separator } from '../separator';
 import { RadioGroup } from '../radio-group';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { clsx } from 'clsx';
 import styles from './ArticleParamsForm.module.scss';
 import {fontColors, fontFamilyOptions,backgroundColors, fontSizeOptions, defaultArticleState, contentWidthArr, OptionType, ArticleStateType} from 'src/constants/articleProps';
+import { useDisclosure } from 'src/hooks/useDisclosure';
 
 interface ArticleParamsFormProps {
     setStyles: (options: ArticleStateType) => void;
+
    }
 
-export const ArticleParamsForm: React.FC<ArticleParamsFormProps> = ({ setStyles }) => {
-
+export const ArticleParamsForm: React.FC<ArticleParamsFormProps> = ({ setStyles}) => {
+	const ref = useRef<HTMLFormElement | null>(null)
     const [isOpen, setIsOpen] = useState(false);
+
+	useDisclosure({
+		isOpen: isOpen,
+		onClose: () => setIsOpen(!isOpen),
+		rootRef: ref
+	})
+
     const [options, setOptions] = useState({
         fontFamilyOption: defaultArticleState.fontFamilyOption,
         fontSizeOption: defaultArticleState.fontSizeOption,
@@ -30,9 +39,11 @@ export const ArticleParamsForm: React.FC<ArticleParamsFormProps> = ({ setStyles 
         }));
       };
 
+
     const classNameContainer = clsx({
         [styles.container]: true,
         [styles.container_open]: isOpen,
+
     });
 
     const handleSubmit:React.FormEventHandler<HTMLFormElement> = (e) =>{
@@ -44,11 +55,12 @@ export const ArticleParamsForm: React.FC<ArticleParamsFormProps> = ({ setStyles 
         setOptions(defaultArticleState)
     }
 
+
     return (
         <>
             <ArrowButton open={isOpen} onClick={()=>{setIsOpen(!isOpen)}} />
-            <aside className={classNameContainer}>
-                <form onSubmit={handleSubmit} onReset={handleReset} className={styles.form}>
+            <aside  className={classNameContainer} >
+                <form ref = {ref} onSubmit={handleSubmit} onReset={handleReset} className={styles.form} style={{gap:50}}>
                     <Text size={31} weight={800} uppercase={true}>Задайте параметры</Text>
                     <Select onChange={(value) => handleInputChanges('fontFamilyOption', value)}  selected={options.fontFamilyOption} options={fontFamilyOptions} title={'Шрифт'}/>
                     <RadioGroup onChange={(value) => handleInputChanges('fontSizeOption', value)} name={'fontSizeOption'} selected={options.fontSizeOption} options={fontSizeOptions}  title={'Размер шрифта'}/>
